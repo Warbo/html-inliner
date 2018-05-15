@@ -1,0 +1,17 @@
+# HTML Inliner #
+
+This script reads HTML data from stdin and writes it to stdout.
+
+It looks for `script` elements with a `src` attribute; and `link` elements with
+`type="text/css"`, `rel="stylesheet"` and a `href` attribute.
+
+The `src` and `href` URLs are resolved (relative to `BASE_URL` env var, if
+given), and their contents fetched. This content is encoded as Base64 and put in
+a data URI in place of the original URL.
+
+Areas for improvement:
+
+ - URL handling/resolving
+ - Better MIME handling (we assume all scripts are `text/javascript` and all CSS
+   is `text/css`)
+ - Support for inlining `img` elements.

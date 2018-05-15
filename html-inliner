@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+try:
+    from BeautifulSoup import BeautifulSoup
+except ImportError:
+    from bs4 import BeautifulSoup
+import os
+import sys
+import urllib2
+import urlparse
+
+def fixup(url):
+    if url.startswith('//'): return 'http:' + url
+    if '://' in url: return url
+    base = os.getenv('BASE_URL')
+    if base:
+        return urlparse.urljoin(base, url)
+    sys.stderr.write(
+        'Found non-absolute URL "{0}", but no BASE_URL given'.format(url))
+
+html = BeautifulSoup(sys.stdin.read())
+for script in html.findAll('script'):
+    url = script['src']
+    if url is not None and not url.startswith('data:'):
+        sys.stderr.write('Found script src "{0}"\n'.format(url))
+        url = fixup(url)
+        sys.stderr.write('Fetching script src "{0}"\n'.format(url))
+        data          = urllib2.urlopen(url).read()
+        script['src'] = 'data:text/javascript;base64,' + data.encode('base64')
+
+for css in html.findAll('link',
+                        attrs={'rel': 'stylesheet', 'type': 'text/css'}):
+    url = css['href']
+    if url is not None and not url.startswith('data:'):
+        sys.stderr.write('Found CSS href "{0}"\n'.format(url))
+        url = fixup(url)
+        sys.stderr.write('Fetching CSS href "{0}"\n'.format(url))
+        data        = urllib2.urlopen(url).read()
+        css['href'] = 'data:text/css;base64,' + data.encode('base64')
+
+print html.prettify()
