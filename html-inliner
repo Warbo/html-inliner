@@ -13,6 +13,8 @@ def fixup(url):
     if '://' in url: return url
     base = os.getenv('BASE_URL')
     if base:
+        if base.startswith('file://'):
+            return base + '/' + url
         return urlparse.urljoin(base, url)
     sys.stderr.write(
         'Found non-absolute URL "{0}", but no BASE_URL given'.format(url))
