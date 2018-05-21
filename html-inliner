@@ -19,6 +19,8 @@ def fixup(url):
 
 html = BeautifulSoup(sys.stdin.read())
 for script in html.findAll('script'):
+    if not script.has_key('src'):
+        continue
     url = script['src']
     if url is not None and not url.startswith('data:'):
         sys.stderr.write('Found script src "{0}"\n'.format(url))
@@ -29,6 +31,8 @@ for script in html.findAll('script'):
 
 for css in html.findAll('link',
                         attrs={'rel': 'stylesheet', 'type': 'text/css'}):
+    if not css.has_key('href'):
+        continue
     url = css['href']
     if url is not None and not url.startswith('data:'):
         sys.stderr.write('Found CSS href "{0}"\n'.format(url))
